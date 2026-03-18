@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر الجزائر .DZ</title>
+    <title>ALGERIAN SHOP .DZ</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
@@ -28,26 +28,21 @@
     </div>
 
     <script>
-        // تهيئة المكتبة
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        // دالة تسجيل الدخول
         async function handleLogin() {
-            // التنبيه الذي طلبته للتأكد من عمل الزر
             alert("الزر يعمل برمجياً! جاري الاتصال بـ Pi SDK...");
-            
             try {
                 const scopes = ['username', 'payments'];
                 const user = await Pi.authenticate(scopes, function(onIncomplete) {});
                 document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
                 alert("تم تسجيل الدخول بنجاح!");
             } catch (err) {
-                alert("خطأ: تأكد أنك داخل Pi Browser وأنك فعلت وضع المطور في المحفظة.");
+                alert("خطأ: تأكد من تفعيل Developer Mode في المحفظة.");
             }
         }
 
-        // دالة الدفع
         async function handlePayment(amount, item) {
             try {
                 await Pi.createPayment({
