@@ -6,39 +6,28 @@
     <title>ALGERIAN SHOP .DZ</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; text-align: center; }
-        .header { background-color: #006633; color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn-auth { background-color: #6c5ce7; color: white; border: none; padding: 12px 35px; border-radius: 25px; cursor: pointer; font-size: 1.1rem; margin-bottom: 30px; transition: 0.3s; }
-        .btn-auth.success { background-color: #28a745; }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .product-card { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); width: 260px; padding: 15px; border-bottom: 4px solid #d21034; }
-        .product-img { width: 100%; height: 180px; border-radius: 10px; object-fit: cover; margin-bottom: 15px; background-color: #eee; }
-        .price { color: #d21034; font-size: 1.3rem; font-weight: bold; margin: 10px 0; }
-        .btn-buy { background-color: #e67e22; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        body { font-family: sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
+        .header { background-color: #006633; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .product-card { background: white; border-radius: 10px; padding: 15px; margin: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; width: 250px; }
+        .product-img { width: 100%; height: 150px; border-radius: 5px; object-fit: cover; background-color: #ddd; }
+        .btn-auth { background-color: #6c5ce7; color: white; border: none; padding: 12px 25px; border-radius: 20px; cursor: pointer; }
+        .btn-buy { background-color: #e67e22; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>🇩🇿 متجر الجزائر .DZ 🇩🇿</h1>
-        <p>التسوق عبر بلوكشين Pi</p>
     </div>
 
     <button id="auth-btn" class="btn-auth" onclick="login()">تسجيل الدخول عبر Pi</button>
 
-    <div class="container">
+    <div id="products-container">
         <div class="product-card">
             <img src="https://m.media-amazon.com/images/I/71JLmhu21IL._AC_SL1500_.jpg" class="product-img">
             <h3>Samsung S24 Ultra</h3>
-            <p class="price">150 Pi</p>
-            <button class="btn-buy" onclick="createPayment(150, 'Samsung S24 Ultra')">شراء الآن</button>
-        </div>
-
-        <div class="product-card">
-            <img src="https://m.media-amazon.com/images/I/710p-vS6qLL._AC_SL1500_.jpg" class="product-img">
-            <h3>Laptop HP Pavilion</h3>
-            <p class="price">320 Pi</p>
-            <button class="btn-buy" onclick="createPayment(320, 'Laptop HP')">شراء الآن</button>
+            <p>السعر: 150 Pi</p>
+            <button class="btn-buy" onclick="pay(150, 'Samsung S24')">شراء الآن</button>
         </div>
     </div>
 
@@ -49,36 +38,30 @@
         async function login() {
             try {
                 const scopes = ['username', 'payments'];
-                function onIncompletePaymentFound(payment) { /* معالجة المدفوعات المعلقة */ }
-
-                const user = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                const btn = document.getElementById('auth-btn');
-                btn.innerText = "مرحباً: " + user.user.username;
-                btn.classList.add('success');
-                alert("تم تسجيل دخولك بنجاح باسم: " + user.user.username);
+                const user = await Pi.authenticate(scopes, function(payment) {
+                    console.log("Incomplete payment found", payment);
+                });
+                document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
+                alert("تم تسجيل الدخول بنجاح!");
             } catch (err) {
-                alert("خطأ: يرجى التأكد من فتح التطبيق داخل Pi Browser");
+                alert("خطأ: يرجى فتح الموقع من داخل Pi Browser");
             }
         }
 
-        async function createPayment(amount, memo) {
+        async function pay(amount, item) {
             try {
                 const payment = await Pi.createPayment({
                     amount: amount,
-                    memo: "طلب شراء: " + memo,
-                    metadata: { productName: memo },
+                    memo: "شراء " + item + " من متجر الجزائر",
+                    metadata: { productName: item },
                 }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        alert("العملية بانتظار موافقة المتجر. رقم الطلب: " + paymentId);
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        alert("مبروك! تمت عملية الدفع بنجاح. معرف العملية: " + txid);
-                    },
-                    onCancel: function(paymentId) { alert("تم إلغاء الدفع."); },
-                    onError: function(error, payment) { alert("حدث خطأ في الدفع."); },
+                    onReadyForServerApproval: function(paymentId) { alert("الطلب قيد الانتظار: " + paymentId); },
+                    onReadyForServerCompletion: function(paymentId, txid) { alert("تم الدفع بنجاح! شكراً لك."); },
+                    onCancel: function(paymentId) { alert("تم إلغاء العملية"); },
+                    onError: function(error, payment) { alert("حدث خطأ أثناء الدفع"); },
                 });
             } catch (err) {
-                alert("يجب تسجيل الدخول أولاً قبل الشراء.");
+                alert("يرجى تسجيل الدخول أولاً");
             }
         }
     </script>
