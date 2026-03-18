@@ -1,39 +1,74 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALGERIAN SHOP .DZ</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: Arial; text-align: center; padding: 50px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        button { background: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 18px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; text-align: center; }
+        .header { background-color: #006633; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .product-card { background: white; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 280px; padding: 15px; transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-img { width: 100%; height: 180px; background-color: #ddd; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #666; }
+        .price { color: #d63031; font-size: 1.2rem; font-weight: bold; margin: 10px 0; }
+        .btn-buy { background-color: #e67e22; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1rem; }
+        .btn-auth { background-color: #6c5ce7; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-size: 1.1rem; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>مرحباً بك في متجر الجزائر 🇩🇿</h1>
-        <p>استمتع بالتسوق باستخدام عملة Pi</p>
-        <button id="auth-btn">تسجيل الدخول بـ Pi</button>
+
+    <div class="header">
+        <h1>🇩🇿 متجر الجزائر .DZ 🇩🇿</h1>
+        <p>أول منصة تسوق جزائرية بعملة Pi</p>
+    </div>
+
+    <button id="auth-btn" class="btn-auth">تسجيل الدخول عبر Pi</button>
+
+    <div class="container">
+        <div class="product-card">
+            <div class="product-img">صورة هاتف ذكي</div>
+            <h3>هاتف سامسونج S24</h3>
+            <p class="price">150 Pi</p>
+            <button class="btn-buy" onclick="transferPi(150, 'Samsung S24')">شراء الآن</button>
+        </div>
+
+        <div class="product-card">
+            <div class="product-img">صورة حاسوب</div>
+            <h3>حاسوب محمول HP</h3>
+            <p class="price">300 Pi</p>
+            <button class="btn-buy" onclick="transferPi(300, 'Laptop HP')">شراء الآن</button>
+        </div>
+
+        <div class="product-card">
+            <div class="product-img">صورة ساعة</div>
+            <h3>ساعة ذكية Apple</h3>
+            <p class="price">80 Pi</p>
+            <button class="btn-buy" onclick="transferPi(80, 'Smart Watch')">شراء الآن</button>
+        </div>
     </div>
 
     <script>
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        document.getElementById('auth-btn').onclick = function() {
-            Pi.authenticate(['username', 'payments'], onIncompletePaymentFound)
-              .then(function(auth) {
-                alert("أهلاً بك يا " + auth.user.username + " في متجرنا!");
-              }).catch(function(error) {
-                console.error(error);
-              });
-        };
-
-        function onIncompletePaymentFound(payment) {
-            // كود معالجة المدفوعات المعلقة لاحقاً
+        async function auth() {
+            try {
+                const scopes = ['username', 'payments'];
+                const user = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
+            } catch (err) { console.error(err); }
         }
+
+        function onIncompletePaymentFound(payment) { /* للتعامل مع المدفوعات غير المكتملة */ }
+
+        function transferPi(amount, productName) {
+            alert("طلب شراء " + productName + " بمبلغ " + amount + " Pi قيد المعالجة...");
+            // هنا سيتم إضافة كود Pi.createPayment لاحقاً
+        }
+
+        document.getElementById('auth-btn').addEventListener('click', auth);
     </script>
 </body>
 </html>
