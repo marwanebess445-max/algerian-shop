@@ -8,10 +8,10 @@
     <style>
         body { font-family: sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
         .header { background-color: #006633; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .product-card { background: white; border-radius: 10px; padding: 15px; margin: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; width: 250px; }
-        .product-img { width: 100%; height: 150px; border-radius: 5px; object-fit: cover; background-color: #ddd; }
-        .btn-auth { background-color: #6c5ce7; color: white; border: none; padding: 12px 25px; border-radius: 20px; cursor: pointer; }
-        .btn-buy { background-color: #e67e22; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-auth { background-color: #6c5ce7; color: white; border: none; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-size: 1.1rem; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 250px; }
+        .btn-buy { background-color: #e67e22; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; }
     </style>
 </head>
 <body>
@@ -20,45 +20,47 @@
         <h1>🇩🇿 متجر الجزائر .DZ 🇩🇿</h1>
     </div>
 
-    <button id="auth-btn" class="btn-auth" onclick="login()">تسجيل الدخول عبر Pi</button>
+    <button id="auth-btn" class="btn-auth" onclick="startLogin()">تسجيل الدخول عبر Pi</button>
 
-    <div id="products-container">
-        <div class="product-card">
-            <img src="https://m.media-amazon.com/images/I/71JLmhu21IL._AC_SL1500_.jpg" class="product-img">
+    <div class="container">
+        <div class="card">
             <h3>Samsung S24 Ultra</h3>
-            <p>السعر: 150 Pi</p>
-            <button class="btn-buy" onclick="pay(150, 'Samsung S24')">شراء الآن</button>
+            <p>150 Pi</p>
+            <button class="btn-buy" onclick="startPayment(150, 'Samsung S24')">شراء الآن</button>
         </div>
     </div>
 
     <script>
+        // تهيئة Pi SDK
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        async function login() {
+        // دالة تسجيل الدخول
+        async function startLogin() {
+            console.log("تم النقر على تسجيل الدخول");
             try {
                 const scopes = ['username', 'payments'];
-                const user = await Pi.authenticate(scopes, function(payment) {
-                    console.log("Incomplete payment found", payment);
-                });
+                const user = await Pi.authenticate(scopes, function(p){});
                 document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
+                document.getElementById('auth-btn').style.backgroundColor = "#28a745";
                 alert("تم تسجيل الدخول بنجاح!");
             } catch (err) {
-                alert("خطأ: يرجى فتح الموقع من داخل Pi Browser");
+                alert("يجب فتح الرابط من داخل Pi Browser");
             }
         }
 
-        async function pay(amount, item) {
+        // دالة الدفع
+        async function startPayment(amount, item) {
             try {
                 const payment = await Pi.createPayment({
                     amount: amount,
-                    memo: "شراء " + item + " من متجر الجزائر",
+                    memo: "شراء " + item,
                     metadata: { productName: item },
                 }, {
-                    onReadyForServerApproval: function(paymentId) { alert("الطلب قيد الانتظار: " + paymentId); },
-                    onReadyForServerCompletion: function(paymentId, txid) { alert("تم الدفع بنجاح! شكراً لك."); },
-                    onCancel: function(paymentId) { alert("تم إلغاء العملية"); },
-                    onError: function(error, payment) { alert("حدث خطأ أثناء الدفع"); },
+                    onReadyForServerApproval: function(id) { console.log("بانتظار الموافقة:", id); },
+                    onReadyForServerCompletion: function(id, tx) { alert("تم الدفع! العملية: " + tx); },
+                    onCancel: function(id) { alert("تم الإلغاء"); },
+                    onError: function(e, p) { alert("خطأ في الدفع"); },
                 });
             } catch (err) {
                 alert("يرجى تسجيل الدخول أولاً");
