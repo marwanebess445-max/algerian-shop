@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALGERIAN SHOP .DZ</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        button { background: #673ab7; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>مرحباً بك في متجر الجزائر 🇩🇿</h1>
+        <p>استمتع بالتسوق باستخدام عملة Pi</p>
+        <button id="auth-btn">تسجيل الدخول بـ Pi</button>
+    </div>
+
+    <script>
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0", sandbox: true });
+
+        document.getElementById('auth-btn').onclick = function() {
+            Pi.authenticate(['username', 'payments'], onIncompletePaymentFound)
+              .then(function(auth) {
+                alert("أهلاً بك يا " + auth.user.username + " في متجرنا!");
+              }).catch(function(error) {
+                console.error(error);
+              });
+        };
+
+        function onIncompletePaymentFound(payment) {
+            // كود معالجة المدفوعات المعلقة لاحقاً
+        }
+    </script>
+</body>
+</html>
