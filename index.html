@@ -1,23 +1,9 @@
-window.handleLogin = async function() {
-    // ضع التنبيه هنا في أول سطر
-    alert("الزر يعمل برمجياً! جاري الآن محاولة الاتصال بـ Pi SDK...");
-
-    try {
-        const scopes = ['username', 'payments'];
-        const user = await Pi.authenticate(scopes, function(onIncomplete) {});
-        document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
-        alert("تم تسجيل الدخول بنجاح!");
-    } catch (err) {
-        alert("خطأ: يرجى فتح الرابط من داخل Pi Browser حصراً.");
-    }
-};
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALGERIAN SHOP .DZ</title>
+    <title>متجر الجزائر .DZ</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
@@ -42,38 +28,42 @@ window.handleLogin = async function() {
     </div>
 
     <script>
-        // التأكد من تحميل المكتبة أولاً
+        // تهيئة المكتبة
         const Pi = window.Pi;
         Pi.init({ version: "2.0", sandbox: true });
 
-        // تعريف الدوال عبر window لضمان استجابة الزر
-        window.handleLogin = async function() {
+        // دالة تسجيل الدخول
+        async function handleLogin() {
+            // التنبيه الذي طلبته للتأكد من عمل الزر
+            alert("الزر يعمل برمجياً! جاري الاتصال بـ Pi SDK...");
+            
             try {
                 const scopes = ['username', 'payments'];
                 const user = await Pi.authenticate(scopes, function(onIncomplete) {});
                 document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
                 alert("تم تسجيل الدخول بنجاح!");
             } catch (err) {
-                alert("خطأ: يرجى فتح الرابط من داخل Pi Browser حصراً.");
+                alert("خطأ: تأكد أنك داخل Pi Browser وأنك فعلت وضع المطور في المحفظة.");
             }
-        };
+        }
 
-        window.handlePayment = async function(amount, item) {
+        // دالة الدفع
+        async function handlePayment(amount, item) {
             try {
-                const payment = await Pi.createPayment({
+                await Pi.createPayment({
                     amount: amount,
                     memo: "شراء " + item,
                     metadata: { productName: item },
                 }, {
-                    onReadyForServerApproval: function(id) { alert("بانتظار الموافقة..."); },
-                    onReadyForServerCompletion: function(id, tx) { alert("تم الدفع! رقم المعاملة: " + tx); },
-                    onCancel: function(id) { alert("تم الإلغاء."); },
-                    onError: function(e, p) { alert("خطأ في الدفع."); }
+                    onReadyForServerApproval: (id) => alert("بانتظار الموافقة..."),
+                    onReadyForServerCompletion: (id, tx) => alert("تم الدفع بنجاح!"),
+                    onCancel: (id) => alert("تم الإلغاء"),
+                    onError: (e, p) => alert("خطأ في الدفع"),
                 });
             } catch (err) {
-                alert("يرجى تسجيل الدخول أولاً.");
+                alert("يرجى تسجيل الدخول أولاً");
             }
-        };
+        }
     </script>
 </body>
 </html>
