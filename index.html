@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,93 +7,60 @@
     <title>ALGERIAN SHOP .DZ</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; text-align: center; }
-        .header { background-color: #006633; color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn-auth { background-color: #6c5ce7; color: white; border: none; padding: 15px 35px; border-radius: 30px; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3); }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 30px; }
-        .product-card { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); width: 260px; padding: 15px; border-bottom: 4px solid #d21034; }
-        .product-img { width: 100%; height: 180px; border-radius: 10px; object-fit: cover; background-color: #eee; }
-        .price { color: #d21034; font-size: 1.4rem; font-weight: bold; margin: 10px 0; }
-        .btn-buy { background-color: #e67e22; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; }
+        body { font-family: sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
+        .header { background-color: #006633; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .btn-auth { background-color: #6c5ce7; color: white; border: none; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-size: 1.1rem; }
+        .product-card { background: white; border-radius: 10px; padding: 15px; margin: 20px auto; width: 280px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-buy { background-color: #e67e22; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>🇩🇿 متجر الجزائر .DZ 🇩🇿</h1>
-        <p>تسوق بآمان عبر بلوكشين Pi</p>
     </div>
 
-    <button id="auth-btn" class="btn-auth" onclick="login()">تسجيل الدخول عبر Pi</button>
+    <button id="auth-btn" class="btn-auth" onclick="handleLogin()">تسجيل الدخول عبر Pi</button>
 
-    <div class="container">
-        <div class="product-card">
-            <img src="https://m.media-amazon.com/images/I/71JLmhu21IL._AC_SL1500_.jpg" class="product-img">
-            <h3>Samsung S24 Ultra</h3>
-            <p class="price">150 Pi</p>
-            <button class="btn-buy" onclick="transferPi(150, 'Samsung S24 Ultra')">شراء الآن</button>
-        </div>
-
-        <div class="product-card">
-            <img src="https://m.media-amazon.com/images/I/710p-vS6qLL._AC_SL1500_.jpg" class="product-img">
-            <h3>Laptop HP Pavilion</h3>
-            <p class="price">320 Pi</p>
-            <button class="btn-buy" onclick="transferPi(320, 'Laptop HP')">شراء الآن</button>
-        </div>
+    <div class="product-card">
+        <h3>Samsung S24 Ultra</h3>
+        <p>السعر: 150 Pi</p>
+        <button class="btn-buy" onclick="handlePayment(150, 'Samsung S24')">شراء الآن</button>
     </div>
 
     <script>
-        // تهيئة الـ SDK فور تحميل الصفحة
+        // التأكد من تحميل المكتبة أولاً
         const Pi = window.Pi;
-        try {
-            Pi.init({ version: "2.0", sandbox: true });
-            console.log("Pi SDK Initialized");
-        } catch(e) { console.error("Initialization error:", e); }
+        Pi.init({ version: "2.0", sandbox: true });
 
-        // دالة تسجيل الدخول المصححة
-        async function login() {
+        // تعريف الدوال عبر window لضمان استجابة الزر
+        window.handleLogin = async function() {
             try {
                 const scopes = ['username', 'payments'];
-                
-                // دالة التعامل مع المدفوعات المعلقة (إجبارية في المتصفح الجديد)
-                function onIncompletePaymentFound(payment) {
-                    console.log("Incomplete payment:", payment);
-                };
-
-                const user = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
-                // تحديث واجهة المستخدم
-                const btn = document.getElementById('auth-btn');
-                btn.innerText = "مرحباً: " + user.user.username;
-                btn.style.backgroundColor = "#28a745";
-                alert("أهلاً بك " + user.user.username + " في متجرك!");
+                const user = await Pi.authenticate(scopes, function(onIncomplete) {});
+                document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
+                alert("تم تسجيل الدخول بنجاح!");
             } catch (err) {
-                alert("خطأ: يرجى التأكد من فتح الرابط داخل Pi Browser وليس متصفح عادي.");
-                console.error(err);
+                alert("خطأ: يرجى فتح الرابط من داخل Pi Browser حصراً.");
             }
-        }
+        };
 
-        // دالة الدفع
-        async function transferPi(amount, productName) {
+        window.handlePayment = async function(amount, item) {
             try {
                 const payment = await Pi.createPayment({
                     amount: amount,
-                    memo: "شراء " + productName + " من متجر الجزائر .DZ",
-                    metadata: { item: productName },
+                    memo: "شراء " + item,
+                    metadata: { productName: item },
                 }, {
-                    onReadyForServerApproval: function(paymentId) {
-                        alert("العملية بانتظار الموافقة. معرف الطلب: " + paymentId);
-                    },
-                    onReadyForServerCompletion: function(paymentId, txid) {
-                        alert("تم الدفع بنجاح! رقم المعاملة: " + txid);
-                    },
-                    onCancel: function(paymentId) { alert("تم إلغاء العملية."); },
-                    onError: function(error, payment) { alert("حدث خطأ في الدفع."); },
+                    onReadyForServerApproval: function(id) { alert("بانتظار الموافقة..."); },
+                    onReadyForServerCompletion: function(id, tx) { alert("تم الدفع! رقم المعاملة: " + tx); },
+                    onCancel: function(id) { alert("تم الإلغاء."); },
+                    onError: function(e, p) { alert("خطأ في الدفع."); }
                 });
             } catch (err) {
-                alert("يجب عليك تسجيل الدخول أولاً بالزر البنفسجي.");
+                alert("يرجى تسجيل الدخول أولاً.");
             }
-        }
+        };
     </script>
 </body>
 </html>
