@@ -1,3 +1,16 @@
+window.handleLogin = async function() {
+    // ضع التنبيه هنا في أول سطر
+    alert("الزر يعمل برمجياً! جاري الآن محاولة الاتصال بـ Pi SDK...");
+
+    try {
+        const scopes = ['username', 'payments'];
+        const user = await Pi.authenticate(scopes, function(onIncomplete) {});
+        document.getElementById('auth-btn').innerText = "مرحباً: " + user.user.username;
+        alert("تم تسجيل الدخول بنجاح!");
+    } catch (err) {
+        alert("خطأ: يرجى فتح الرابط من داخل Pi Browser حصراً.");
+    }
+};
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
